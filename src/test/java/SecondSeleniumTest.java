@@ -9,12 +9,12 @@ import org.openqa.selenium.chrome.ChromeOptions;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
 
-public class SecondSeleniumTest {
+public class SecondSeleniumTest extends TestBase {
 
     public static WebDriver drv1;
 
-    @BeforeAll
-    static void setUp(){
+    @BeforeEach
+    void setUp(){
 
         ChromeOptions opt = new ChromeOptions();
 //        opt.setAcceptInsecureCerts(true);
@@ -23,12 +23,12 @@ public class SecondSeleniumTest {
         WebDriverManager.chromedriver().setup();
         drv1 = new ChromeDriver(opt);
 //        System.out.println(((HasCapabilities) drv1).getCapabilities());
-        drv1.get("http://158.101.173.161/");
+        drv1.get(getBASE_URL());
 
     }
 
-    @AfterAll
-    static void closeUp(){
+    @AfterEach
+    void closeUp(){
         drv1.close();
     }
 
