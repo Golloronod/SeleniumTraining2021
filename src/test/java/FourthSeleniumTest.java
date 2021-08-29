@@ -6,20 +6,38 @@ import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.chrome.ChromeDriver;
+import org.openqa.selenium.chrome.ChromeOptions;
+import org.openqa.selenium.remote.CapabilityType;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
 import java.util.List;
+import java.util.Random;
+import java.util.concurrent.TimeUnit;
 
 public class FourthSeleniumTest extends TestBase {
 
     public WebDriver drv;
     public WebDriverWait wait;
 
+    public void selectRandomProduct() {
+        //Preparing the list of all products in the Popular Products section
+        List<WebElement> allProducts = drv.findElements(By.xpath("//section[@id='box-popular-products']/div[@class='listing products']/article/a"));
+        //Declaring new variable with the type of Random
+        Random rand = new Random();
+        //Selecting the random integer number from the total amount of the Products
+        int randomProduct = rand.nextInt(allProducts.size());
+        //Clicking on the randomly selected Product
+        allProducts.get(randomProduct).click();
+    }
+
 
     @BeforeEach
     void setUp() {
         WebDriverManager.chromedriver().setup();
-        drv = new ChromeDriver();
+        ChromeOptions opt = new ChromeOptions();
+        drv = new ChromeDriver(opt);
+        drv.manage().timeouts().pageLoadTimeout(5, TimeUnit.SECONDS);
+        opt.setCapability(CapabilityType.PAGE_LOAD_STRATEGY, "complete");
         wait = new WebDriverWait(drv, 5);
     }
 
@@ -38,9 +56,8 @@ public class FourthSeleniumTest extends TestBase {
         wait.until(ExpectedConditions.elementToBeClickable(By.xpath("//button[@name='accept_cookies']"))).click();
         //Repeating the below 3 times so that 3 items were added to the cart
         for (int i=1;i<=3;i++) {
-            //Waiting for the i-th element in the Popular Products to be clickable and clicking it
-            wait.until(ExpectedConditions.elementToBeClickable(By.xpath("//section[@id='box-popular-products']//article[" + i + "]"))).click();
-
+            //Selecting random product from the Popular Products list
+            selectRandomProduct();
             //Waiting for the "Add To Cart" button to be clickable and clicking it
             wait.until(ExpectedConditions.elementToBeClickable(By.xpath("//button[@class='btn btn-success']"))).click();
             //Waiting for the proper number in the cart quantity
@@ -54,22 +71,33 @@ public class FourthSeleniumTest extends TestBase {
 
         //Clicking on the Checkout icon for transferring to the cart
         drv.findElement(By.xpath("//div[@id='cart']")).click();
-        //Waiting for the Shopping Cart to be loaded and verifying it contains 3 items
-        wait.until(ExpectedConditions.numberOfElementsToBe(By.xpath("//ul[@class='items list-unstyled']/li"), 3));
+        //Waiting for the Shopping Cart to be loaded
+        wait.until(ExpectedConditions.presenceOfElementLocated(By.xpath("//ul[@class='items list-unstyled']")));
+        //Saving the list of items in the cart
+        List<WebElement> itemsInCart = drv.findElements(By.xpath("//ul[@class='items list-unstyled']/li//button[@name='remove_cart_item']"));
         //Waiting for the Payment Due amount is present on the page and saving this value to a variable
         String paymentDueInitial = wait.until(ExpectedConditions.presenceOfElementLocated(By.xpath("//table[@class='table table-striped table-bordered data-table']//tr//td//span[@class='currency-amount']"))).getText();
-        //Removing all 3 items in the cart one by one and verifying it changes the Payment Due amount
-        for (int i=1;i<=3;i++) {
+        System.out.println("Payment Due Initial: " + paymentDueInitial);
+        //Removing all items in the cart one by one and verifying it changes the Payment Due amount
+        for (int i=1;i<=itemsInCart.size();i++) {
             //Removing always the 1st item in the list
             wait.until(ExpectedConditions.elementToBeClickable(By.xpath("//ul[@class='items list-unstyled']/li[1]//button[@name='remove_cart_item']"))).click();
             //Waiting for the Shopping Cart to be loaded and verifying it contains for 1 item less after each removal
-            wait.until(ExpectedConditions.numberOfElementsToBe(By.xpath("//ul[@class='items list-unstyled']/li"), 3-i));
-            //Waiting for the Payment Due amount is present on the page and saving this value to a new variable
-            String paymentDueNew = wait.until(ExpectedConditions.presenceOfElementLocated(By.xpath("//table[@class='table table-striped table-bordered data-table']//tr//td//span[@class='currency-amount']"))).getText();
-            //Verifying the Payment Due is changed by comparing Initial and New variables
-            if (paymentDueInitial.equals(paymentDueNew)) {
-                System.out.println("Something went wrong. Payment Due is not changed.");
-            }
+            wait.until(ExpectedConditions.numberOfElementsToBe(By.xpath("//ul[@class='items list-unstyled']/li"), itemsInCart.size()-i));
+            //Waiting for the Payment Due amount is present on the page
+            wait.until(ExpectedConditions.stalenessOf(drv.findElement(By.xpath("//table[@class='table table-striped table-bordered data-table']//tr//td//span[@class='currency-amount']"))));
+            //Saving and comparing the new Payment Due amount for all except the last removal iteration
+            if (i<itemsInCart.size()) {
+                //Saving the value of the Payment Due amount to a new variable
+                String paymentDueNew = drv.findElement(By.xpath("//table[@class='table table-striped table-bordered data-table']//tr//td//span[@class='currency-amount']")).getText();
+                System.out.println("Payment Due New: " + paymentDueNew);
+                //Verifying the Payment Due is changed by comparing Initial and New variables
+                if (paymentDueInitial.equals(paymentDueNew)) {
+                    System.out.println("Something went wrong. Payment Due is not changed.");
+                }
+            } else
+                System.out.println("Payment Due New: USD $00.00");
+
         }
         //Waiting for the "Back" button to be clickable on the page and clicking it
         wait.until(ExpectedConditions.elementToBeClickable(By.xpath("//a[@class='btn btn-default']"))).click();
