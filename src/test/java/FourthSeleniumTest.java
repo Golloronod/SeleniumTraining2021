@@ -1,23 +1,13 @@
-import io.github.bonigarcia.wdm.WebDriverManager;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.openqa.selenium.By;
-import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
-import org.openqa.selenium.chrome.ChromeDriver;
-import org.openqa.selenium.chrome.ChromeOptions;
-import org.openqa.selenium.remote.CapabilityType;
 import org.openqa.selenium.support.ui.ExpectedConditions;
-import org.openqa.selenium.support.ui.WebDriverWait;
 import java.util.List;
 import java.util.Random;
-import java.util.concurrent.TimeUnit;
 
 public class FourthSeleniumTest extends TestBase {
-
-    public WebDriver drv;
-    public WebDriverWait wait;
 
     public void selectRandomProduct() {
         //Preparing the list of all products in the Popular Products section
@@ -33,12 +23,7 @@ public class FourthSeleniumTest extends TestBase {
 
     @BeforeEach
     void setUp() {
-        WebDriverManager.chromedriver().setup();
-        ChromeOptions opt = new ChromeOptions();
-        drv = new ChromeDriver(opt);
-        drv.manage().timeouts().pageLoadTimeout(5, TimeUnit.SECONDS);
-        opt.setCapability(CapabilityType.PAGE_LOAD_STRATEGY, "complete");
-        wait = new WebDriverWait(drv, 5);
+        drv.get(getBASE_URL());
     }
 
 
@@ -50,11 +35,9 @@ public class FourthSeleniumTest extends TestBase {
 
     @Test
     void test1() {
-        //Opening main page
-        drv.get(getBASE_URL());
-        //Accepting cookies
-        wait.until(ExpectedConditions.elementToBeClickable(By.xpath("//button[@name='accept_cookies']"))).click();
-        //Repeating the below 3 times so that 3 items were added to the cart
+        //Accepting cookies if they exist
+        acceptCookies();
+        //Repeating the below actions 3 times so that 3 items were added to the cart
         for (int i=1;i<=3;i++) {
             //Selecting random product from the Popular Products list
             selectRandomProduct();
@@ -65,7 +48,7 @@ public class FourthSeleniumTest extends TestBase {
 
             if (i<3) {
                 //Clicking to the logo for transferring to the main page
-                drv.findElement(By.xpath("//a[@class='logotype']")).click();
+                drv.get(getBASE_URL());
             }
         }
 
@@ -107,11 +90,7 @@ public class FourthSeleniumTest extends TestBase {
     @Test
     void test2() {
         //Opening admin page
-        drv.get(getBASE_URL() + "admin");
-        //Entering credentials and clicking "Login" button
-        drv.findElement(By.xpath("//input[contains(@class,'form-control') and contains(@name,'username')]")).sendKeys(getADMIN_USER());
-        drv.findElement(By.xpath("//input[contains(@class,'form-control') and contains(@name,'password')]")).sendKeys(getADMIN_PWD());
-        drv.findElement(By.xpath("//button[contains(@class,'btn btn-default') and contains(@name,'login')]")).click();
+        loginToAdmin();
         //Waiting for the "Countries" menu item to be clickable and clicking it
         wait.until(ExpectedConditions.elementToBeClickable(By.xpath("//ul[@id='box-apps-menu']/li/a//span[contains(@title, 'Countries')]"))).click();
         //Waiting for the "Add New Country" button to be clickable and clicking it

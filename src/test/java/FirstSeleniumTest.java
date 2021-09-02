@@ -29,7 +29,7 @@ public class FirstSeleniumTest extends TestBase {
 
     @AfterEach
     void closeUp(){
-        drv1.close();
+        drv1.quit();
     }
 
     @Test

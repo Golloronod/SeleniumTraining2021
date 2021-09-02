@@ -14,22 +14,19 @@ public class Listener extends AbstractWebDriverEventListener {
 
     @Override
     public void afterFindBy(By by, WebElement element, WebDriver driver) {
-        System.out.println("FOUND OK");
-        System.out.println("");
+        System.out.println("FOUND OK\n");
     }
 
     @Override
     public void onException(Throwable throwable, WebDriver driver) {
         System.out.println("EXCEPTION: " + throwable.getMessage().split(":")[0]);
-        System.out.println("Screenshot is made.");
-        System.out.println("");
-
         File tempFile = ((TakesScreenshot) driver).getScreenshotAs(OutputType.FILE);
         try {
             Files.copy(tempFile.toPath(), (new File(System.currentTimeMillis() + "screen.png")).toPath());
         } catch (IOException e) {
             e.printStackTrace();
         }
+        System.out.println("Screenshot is made.\n");
     }
 
 }

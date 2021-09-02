@@ -1,0 +1,22 @@
+plugins {
+    id 'java'
+}
+
+group 'com.globallogic'
+version '1.0-SNAPSHOT'
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    implementation 'org.jetbrains:annotations:20.1.0'
+    testImplementation 'org.junit.jupiter:junit-jupiter-api:5.7.2'
+    testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.7.2'
+    testImplementation group: 'org.seleniumhq.selenium', name: 'selenium-java', version: '3.141.59'
+    testImplementation("io.github.bonigarcia:webdrivermanager:4.4.3")
+}
+
+test {
+    useJUnitPlatform()
+}

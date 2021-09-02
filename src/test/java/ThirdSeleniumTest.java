@@ -1,66 +1,52 @@
 import io.github.bonigarcia.wdm.WebDriverManager;
 import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.openqa.selenium.By;
-import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
-import org.openqa.selenium.chrome.ChromeDriver;
-import org.openqa.selenium.support.ui.ExpectedConditions;
-import org.openqa.selenium.support.ui.WebDriverWait;
 
 import java.util.List;
 
 public class ThirdSeleniumTest extends TestBase {
 
-    public WebDriver drv;
-
-
     @BeforeEach
     void setUp() {
-        WebDriverManager.chromedriver().setup();
-        drv = new ChromeDriver();
-        drv.get(getBASE_URL() + "admin");
-        drv.findElement(By.xpath("//input[contains(@class,'form-control') and contains(@name,'username')]")).sendKeys(getADMIN_USER());
-        drv.findElement(By.xpath("//input[contains(@class,'form-control') and contains(@name,'password')]")).sendKeys(getADMIN_PWD());
-        drv.findElement(By.xpath("//button[contains(@class,'btn btn-default') and contains(@name,'login')]")).click();
-
-        WebDriverWait wait = new WebDriverWait(drv, 5);
-        //Waiting for the first SIde Menu item is clickable
-        wait.until(ExpectedConditions.elementToBeClickable(By.xpath("//ul[@id='box-apps-menu']")));
-
-
+        loginToAdmin();
     }
 
     @AfterEach
     void closeUp() {
-        drv.close();
+        drv.quit();
     }
 
     @Test
-    void test1() {
+    void test1() throws InterruptedException {
 
+        //Preparing the list of items in the Side Menu
         List<WebElement> sideMenu = drv.findElements(By.xpath("//ul[@id='box-apps-menu']/li[@class='app']"));
+        //Clicking on them one by one
         for (int i=1;i<=sideMenu.size();i++) {
             drv.findElement(By.xpath("//ul[@id='box-apps-menu']/li[" + i + "]")).click();
-            if (drv.findElement(By.xpath("//div[@class='panel-heading']")).isDisplayed()) {
-                System.out.println(drv.findElement(By.xpath("//div[@class='panel-heading']")).getText());
-            }   else {
-                System.out.println("Header is not present for the Side Menu item #" + i);
-            }
+            //"Ugly" workaround for wait
+            Thread.sleep(500);
+            //Asserting if the Header exists on the page, and if not, printing the corresponding message
+            Assertions.assertTrue(isElementPresent(By.xpath("//div[@class='panel-heading']")), "Header is not present for the Side Menu item #" + i);
+            //If the Header exists, printing its name
+            System.out.println(drv.findElement(By.xpath("//div[@class='panel-heading']")).getText());
 
+            //For each of the item in Side Menu preparing the list of the items in its Sub Menu
             List<WebElement> subMenu = drv.findElements(By.xpath("//ul[@id='box-apps-menu']/li[" + i + "]//ul/li"));
+            //If such Sub Menu items exist, clicking on them one by one
             if (0 < subMenu.size()) {
                 for (int j=1;j<=subMenu.size();j++) {
                     drv.findElement(By.xpath("//ul[@id='box-apps-menu']/li[" + i + "]//ul/li[" + j + "]")).click();
-                    if (drv.findElement(By.xpath("//ul[@id='box-apps-menu']/li[" + i + "]//ul/li[" + j + "]")).isDisplayed()) {
-                        System.out.println("   " + drv.findElement(By.xpath("//ul[@id='box-apps-menu']/li[" + i + "]//ul/li[" + j + "]")).getText());
-                    }   else
-                        System.out.println("   Header is not present for the SUB Menu item #" + j);
+                    //Asserting if the Header exists on the page, and if not, printing the corresponding message
+                    Assertions.assertTrue(isElementPresent(By.xpath("//div[@class='panel-heading']")), "   Header is not present for the SUB Menu item #" + j);
+                    //If the Header exists, printing its name
+                    System.out.println("   " + drv.findElement(By.xpath("//ul[@id='box-apps-menu']/li[" + i + "]//ul/li[" + j + "]")).getText());
                 }
             }
         }
-
-
     }
 }
