@@ -4,20 +4,16 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebElement;
-import org.openqa.selenium.chrome.ChromeDriver;
-import org.openqa.selenium.support.events.EventFiringWebDriver;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 import java.util.List;
 
 
-public class FifthSeleniumTest extends TestBase {
-
-    EventFiringWebDriver drv;
+public class FifthSeleniumTest extends TestBaseLog {
 
     @BeforeEach
     void setUp() {
-        drv = new EventFiringWebDriver(new ChromeDriver());
-        drv.register(new Listener());
+        //Opening the admin page
+        loginToAdmin();
     }
 
     @AfterEach
@@ -27,14 +23,10 @@ public class FifthSeleniumTest extends TestBase {
 
     @Test
     void test1() throws InterruptedException {
-        //Opening the admin page
-        loginToAdmin();
-
         //Waiting for the Side Menu to be present
         wait.until(ExpectedConditions.presenceOfElementLocated(By.xpath("//div[@id='sidebar']")));
         //Preparing the list of items in the Side Menu
         List<WebElement> sideMenu = drv.findElements(By.xpath("//ul[@id='box-apps-menu']/li[@class='app']"));
-        System.out.println(sideMenu.size());
         //Clicking on them one by one and checking if the header is displayed
         for (int i=1;i<=sideMenu.size();i++) {
             drv.findElement(By.xpath("//ul[@id='box-apps-menu']/li[" + i + "]")).click();
