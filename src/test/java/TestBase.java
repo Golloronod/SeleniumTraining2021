@@ -34,10 +34,10 @@ public class TestBase {
     public void settingUp() {
 
         ChromeOptions opt = new ChromeOptions();
+        opt.setCapability(CapabilityType.PAGE_LOAD_STRATEGY, "normal");
         WebDriverManager.chromedriver().setup();
         drv = new ChromeDriver(opt);
         drv.manage().timeouts().pageLoadTimeout(5, TimeUnit.SECONDS);
-        opt.setCapability(CapabilityType.PAGE_LOAD_STRATEGY, "complete");
         wait = new WebDriverWait(drv, 5);
     }
 
